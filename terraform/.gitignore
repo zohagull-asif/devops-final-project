@@ -1,0 +1,6 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+aws-key.pem
+*.pem
