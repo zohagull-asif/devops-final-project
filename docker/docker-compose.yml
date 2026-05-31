@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: taskflow
+      POSTGRES_PASSWORD: taskflow
+      POSTGRES_DB: taskflowdb
+    volumes:
+      - ../app/database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow -d taskflowdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ../app/backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: taskflow
+      DB_PASSWORD: taskflow
+      DB_NAME: taskflowdb
+      PORT: 5000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../app/frontend
+    ports:
+      - "8090:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
