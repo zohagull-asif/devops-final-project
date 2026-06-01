@@ -35,6 +35,12 @@ pipeline {
                 }
             }
         }
+        stage('Security Scan - OWASP ZAP') {
+            steps {
+                echo 'Running OWASP ZAP baseline scan against the running app...'
+                sh 'docker run --rm --network host ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:8090 -I || true'
+            }
+        }
     }
     post {
         success {
