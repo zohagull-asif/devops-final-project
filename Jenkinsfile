@@ -41,6 +41,14 @@ pipeline {
                 sh 'docker run --rm --network host ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:8090 -I || true'
             }
         }
+        stage('Code Quality - SonarQube') {
+            steps {
+                echo 'Running SonarQube static analysis...'
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh 'docker run --rm --network host -v $(pwd):/usr/src sonarsource/sonar-scanner-cli -Dsonar.projectKey=taskflow -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.token=$SONAR_TOKEN -Dsonar.working.directory=/tmp/.scannerwork || true'
+                }
+            }
+        }
     }
     post {
         success {
